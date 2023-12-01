@@ -1,73 +1,33 @@
 #include <iostream>
 #include <vector>
-#include <algorithm>
-
 using namespace std;
 
-struct Process
-{
-    int processID;
-    int arrivalTime;
-    int burstTime;
-    int finishTime;
-    int waitingTime;
-    int turnaroundTime;
-};
-
-bool compareArrivalTime(const Process &a, const Process &b)
-{
-    return a.arrivalTime < b.arrivalTime;
-}
 
 int main()
 {
-    int numProcesses;
+    vector<string> jobs = {"Job1", "Job2", "Job3", "Job4"};
+    vector<int> executionTime = {24, 3, 3, 5};
 
-    cout << "Enter the number of processes: ";
-    cin >> numProcesses;
+    int numJobs = jobs.size();
+    vector<int> finish_time(numJobs, 0);
+    vector<int> turnaroundTime(numJobs, 0);
+    vector<int> waiting_time(numJobs, 0);
 
-    vector<Process> processes(numProcesses);
+    finish_time[0] = executionTime[0];
+    turnaroundTime[0] = finish_time[0];
+    waiting_time[0] = 0;
 
-    cout << "Enter arrival time and burst time for each process:\n";
-    for (int i = 0; i < numProcesses; i++)
+    for (int i = 1; i < numJobs; i++)
     {
-        processes[i].processID = i + 1;
-        cout << "Process " << i + 1 << " - Arrival Time: ";
-        cin >> processes[i].arrivalTime;
-        cout << "Process " << i + 1 << " - Burst Time: ";
-        cin >> processes[i].burstTime;
+        finish_time[i] = finish_time[i - 1] + executionTime[i];
+        turnaroundTime[i] = finish_time[i];
+        waiting_time[i] = turnaroundTime[i] - executionTime[i];
     }
 
-    // Sort processes based on arrival time
-    sort(processes.begin(), processes.end(), compareArrivalTime);
-
-    // Calculate finish time, waiting time, and turnaround time
-    processes[0].finishTime = processes[0].arrivalTime + processes[0].burstTime;
-    processes[0].waitingTime = 0;
-    processes[0].turnaroundTime = processes[0].burstTime;
-
-    for (int i = 1; i < numProcesses; i++)
+    cout << "Job\tCompletion Time\tTurnaround Time\tWaiting Time\n";
+    for (int i = 0; i < numJobs; i++)
     {
-        processes[i].finishTime = max(processes[i - 1].finishTime, processes[i].arrivalTime) + processes[i].burstTime;
-        processes[i].waitingTime = max(0, processes[i - 1].finishTime - processes[i].arrivalTime);
-        processes[i].turnaroundTime = processes[i].waitingTime + processes[i].burstTime;
+        cout << jobs[i] << "\t" << finish_time[i] << "\t\t" << turnaroundTime[i] << "\t\t" << waiting_time[i] << "\n";
     }
-
-    // Display the table
-    cout << "\nProcess\tArrival Time\tBurst Time\tFinish Time\tWaiting Time\tTurnaround Time\n";
-    for (const Process &p : processes)
-    {
-        cout << p.processID << "\t\t" << p.arrivalTime << "\t\t" << p.burstTime << "\t\t"
-             << p.finishTime << "\t\t" << p.waitingTime << "\t\t" << p.turnaroundTime << "\n";
-    }
-
-    // Display the final order of execution
-    cout << "\nFinal Order of Execution: ";
-    for (const Process &p : processes)
-    {
-        cout << "P" << p.processID << " ";
-    }
-    cout << "\n";
-
     return 0;
 }
